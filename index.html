@@ -1,26 +1,51 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <title>鉄拳アプリ（抽選）</title>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>整理券抽選</title>
+<style>
+ body{font-family:sans-serif;padding:1rem;max-width:400px;margin:auto;}
+ input,select,button{width:100%;padding:0.8rem;margin:0.5rem 0;font-size:1rem;}
+ button{background:#5e81ac;color:#fff;border:none;border-radius:5px;}
+ .result{padding:1rem;border-radius:5px;margin-top:1rem;}
+ .win{background:#a3be8c;color:#2e3440;}
+ .lose{background:#bf616a;color:#fff;}
+</style>
 </head>
 <body>
-  <h1>鉄拳アプリ（抽選）</h1>
-  <textarea id="names" rows="5" cols="30" placeholder="名前を改行で入力してください"></textarea><br><br>
-  <button onclick="draw()">抽選する</button>
-  <h2 id="result">結果：まだ抽選していません</h2>
+<h2>整理券抽選</h2>
+<input id="id" placeholder="整理番号を入力">
+<select id="hope">
+ <option value="">希望時間選択</option>
+ <!-- 希望時間は30分単位 -->
+ <option>10:00</option><option>10:30</option><option>11:00</option><option>11:30</option><option>12:00</option>
+</select>
+<button onclick="submitDraw()">抽選する</button>
+<div id="msg"></div>
+<script>
+const URL = 'https://script.google.com/macros/s/AKfycbzeUt6wcfOAwVJd-mMqh_78Z1mEz8wk4do8Xk4W4fiNpp2fTwJWYc8aDaPrOqUrq4sQ/exec';
 
-  <script>
-    function draw() {
-      const raw = document.getElementById("names").value.trim();
-      const list = raw.split("\n").filter(name => name !== "");
-      if (list.length === 0) {
-        alert("名前を入力してください！");
-        return;
-      }
-      const winner = list[Math.floor(Math.random() * list.length)];
-      document.getElementById("result").innerText = `結果：${winner}さんが当選！`;
+async function submitDraw(){
+  const id = document.getElementById('id').value.trim();
+  const hope = document.getElementById('hope').value;
+  if(!id || !hope){ alert('番号と希望時間を入力してください'); return; }
+  const res = await fetch(URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:`id=${encodeURIComponent(id)}&hope=${encodeURIComponent(hope)}`
+  });
+  const data = await res.json();
+  const el = document.getElementById('msg');
+  el.className='result ' + (data.win ? 'win' : 'lose');
+  if(data.win){
+    if(data.assign){
+      el.innerText = `当選！案内時間：${data.assign}`;
+    } else {
+      el.innerText = '当選しましたが、希望枠は満席です。繰り上げを待機中';
     }
-  </script>
+  } else {
+    el.innerText = '残念ながらハズレでした…';
+  }
+}
+</script>
 </body>
 </html>
