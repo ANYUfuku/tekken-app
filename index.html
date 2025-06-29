@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>鉄拳アプリ（抽選）</title>
+</head>
+<body>
+  <h1>鉄拳アプリ（抽選）</h1>
+  <textarea id="names" rows="5" cols="30" placeholder="名前を改行で入力してください"></textarea><br><br>
+  <button onclick="draw()">抽選する</button>
+  <h2 id="result">結果：まだ抽選していません</h2>
+
+  <script>
+    function draw() {
+      const raw = document.getElementById("names").value.trim();
+      const list = raw.split("\n").filter(name => name !== "");
+      if (list.length === 0) {
+        alert("名前を入力してください！");
+        return;
+      }
+      const winner = list[Math.floor(Math.random() * list.length)];
+      document.getElementById("result").innerText = `結果：${winner}さんが当選！`;
+    }
+  </script>
+</body>
+</html>
